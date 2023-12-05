@@ -22,6 +22,7 @@ mkdir build
 cd build
 
 # cmake
+#cmake -DDEBUG=ON -DNNG_ENABLE_TLS=ON -DCONFIG_MXCHIP_DEBUG=1 ..
 cmake -DDEBUG=ON -DNNG_ENABLE_TLS=ON ..
 make -j4
 

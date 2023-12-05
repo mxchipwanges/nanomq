@@ -48,6 +48,9 @@
 #include "include/webhook_inproc.h"
 #include "include/cmd_proc.h"
 #include "include/nanomq.h"
+#ifdef CONFIG_MXCHIP_DEBUG
+#include "include/version.h"
+#endif
 // #if defined(SUPP_RULE_ENGINE)
 // 	#include <foundationdb/fdb_c.h>
 // 	#include <foundationdb/fdb_c_options.g.h>
@@ -1078,7 +1081,12 @@ broker(conf *nanomq_conf)
 		log_error("Not support for App lib\n");
 #endif
 	}
+#ifdef CONFIG_MXCHIP_DEBUG
+	printf("NanoMQ Broker(v%d.%d.%d-%s mxchip-debugtls@%s,%s) is started successfully!\n",
+		NANO_VER_MAJOR, NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT, __TIME__, __DATE__);
+#else
 	printf("NanoMQ Broker is started successfully!\n");
+#endif
 
 #if defined(ENABLE_NANOMQ_TESTS)
 	bool is_testing = true;
