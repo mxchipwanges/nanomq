@@ -182,8 +182,8 @@ jobs:
         set -eu
         cd build
         mkdir -p _packages
-        sudo checkinstall --backup=no --install=no --type=debian --arch=${{ steps.prepare.outputs.arch }} --pkgname=nanomq --pkgversion=$(git describe --abbrev=0 --tags) --pkggroup=EMQX --maintainer=EMQX --provides=EMQX --pakdir _packages --recommends=1 --suggests=1 -y
-        sudo mv _packages/nanomq_$(git describe --abbrev=0 --tags)_${{ steps.prepare.outputs.arch }}.deb _packages/${{ steps.prepare.outputs.pkg_name }}
+        sudo checkinstall --backup=no --install=no --type=debian --arch=${{ steps.prepare.outputs.arch }} --pkgname=nanomq --pkgversion=$(git rev-parse --short HEAD) --pkggroup=EMQX --maintainer=EMQX --provides=EMQX --pakdir _packages --recommends=1 --suggests=1 -y
+        sudo mv _packages/nanomq_$(git rev-parse --short HEAD)_${{ steps.prepare.outputs.arch }}.deb _packages/${{ steps.prepare.outputs.pkg_name }}
         cd _packages; echo $(sha256sum ${{ steps.prepare.outputs.pkg_name }} | awk '{print $1}') > ${{ steps.prepare.outputs.pkg_name }}.sha256
 
     - uses: actions/upload-artifact@v3
