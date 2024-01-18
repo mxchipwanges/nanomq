@@ -5,6 +5,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  push:
+  pull_request:
   release:
     types:
     - published
@@ -26,7 +28,6 @@ jobs:
         - "-msquic"
         - "-full"
         - "-full-debug"
-      fail-fast: false
 
     steps:
     - name: install toolchains
@@ -154,6 +155,10 @@ jobs:
         fi
 
         if [ "${{ matrix.build_type }}" == "-full" ] || [ "${{ matrix.build_type }}" == "-full-debug" ]; then
+          if [ "$arch" != "mips" ] ; then
+            make_flags+=" -DENABLE_MYSQL=ON "
+          fi
+          make_flags+=" -DENABLE_RULE_ENGINE=ON "
           make_flags+=" -DENABLE_JWT=ON "
           make_flags+=" -DBUILD_ZMQ_GATEWAY=ON "
           make_flags+=" -DBUILD_BENCH=ON "
