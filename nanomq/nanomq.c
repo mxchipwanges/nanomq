@@ -58,8 +58,13 @@ get_cache_argv()
 static void
 print_version(void)
 {
+#ifdef CONFIG_MXCHIP_DEBUG
+	printf("\n%s v%d.%d.%d-%s mxchip@%s,%s\n", NANO_BRAND, NANO_VER_MAJOR,
+	    NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT, __TIME__, __DATE__);
+#else
 	printf("\n%s v%d.%d.%d-%s\n", NANO_BRAND, NANO_VER_MAJOR,
 	    NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT);
+#endif
 	printf("Copyright 2022 EMQ Edge Computing Team\n");
 	printf("\n");
 }
