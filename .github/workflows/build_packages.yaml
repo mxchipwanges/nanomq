@@ -23,9 +23,9 @@ jobs:
         package_type:
         - deb
         build_type:
-        - ""
-        - "-sqlite"
-        - "-msquic"
+        # - ""
+        # - "-sqlite"
+        # - "-msquic"
         - "-full"
         - "-full-debug"
 
