@@ -19,33 +19,15 @@ jobs:
       fail-fast: false
       matrix:
         arch:
-        - [amd64, gcc, g++, x86_64-linux-gnu, /usr/local]
-        - [arm64, aarch64-linux-gnu-gcc, aarch64-linux-gnu-g++, aarch64-linux-gnu, /usr/aarch64-linux-gnu]
-        - [mips, mips-linux-gnu-gcc, mips-linux-gnu-g++, mips-linux-gnu, /usr/mips-linux-gnu]
-        - [riscv64, riscv64-linux-gnu-gcc, riscv64-linux-gnu-g++, riscv64-linux-gnu, /usr/riscv64-linux-gnu]
         - [armhf, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, arm-linux-gnueabihf, /usr/arm-linux-gnueabihf]
-        - [armel, arm-linux-gnueabi-gcc, arm-linux-gnueabi-g++, arm-linux-gnueabi, /usr/arm-linux-gnueabi]
         package_type:
-        - rpm
         - deb
         build_type:
-        - ""
-        - "-sqlite"
-        - "-msquic"
+        # - ""
+        # - "-sqlite"
+        # - "-msquic"
         - "-full"
-        exclude:
-        - arch: [mips, mips-linux-gnu-gcc, mips-linux-gnu-g++]
-          build_type: "-msquic"
-        - arch: [riscv64, riscv64-linux-gnu-gcc, riscv64-linux-gnu-g++]
-          build_type: "-msquic"
-        - arch: [armel, arm-linux-gnueabi-gcc, arm-linux-gnueabi-g++]
-          build_type: "-msquic"
-        - arch: [mips, mips-linux-gnu-gcc, mips-linux-gnu-g++]
-          build_type: "-full"
-        - arch: [riscv64, riscv64-linux-gnu-gcc, riscv64-linux-gnu-g++]
-          build_type: "-full"
-        - arch: [armel, arm-linux-gnueabi-gcc, arm-linux-gnueabi-g++]
-          build_type: "-full"
+        - "-full-debug"
 
     steps:
     - name: install toolchains
@@ -131,11 +113,11 @@ jobs:
 
         make_flags="-DCMAKE_C_COMPILER=${{ matrix.arch[1] }} -DCMAKE_CXX_COMPILER=${{ matrix.arch[2] }} -DNNG_ENABLE_TLS=ON"
        
-        if [ "${{ matrix.build_type }}" == "-sqlite" ] || [ "${{ matrix.build_type }}" == "-full" ]; then
+        if [ "${{ matrix.build_type }}" == "-sqlite" ] || [ "${{ matrix.build_type }}" == "-full" ] || [ "${{ matrix.build_type }}" == "-full-debug" ]; then
           make_flags+=" -DNNG_ENABLE_SQLITE=ON "
         fi
         
-        if [ "${{ matrix.build_type }}" == "-msquic" ] || [ "${{ matrix.build_type }}" == "-full" ]; then
+        if [ "${{ matrix.build_type }}" == "-msquic" ] || [ "${{ matrix.build_type }}" == "-full" ] || [ "${{ matrix.build_type }}" == "-full-debug" ]; then
           make_flags+=" -DNNG_ENABLE_QUIC=ON "
           make_flags+=" -DNNG_ENABLE_SQLITE=ON "
           make_flags+=" -DQUIC_BUILD_SHARED=OFF "
@@ -155,11 +137,15 @@ jobs:
           fi
         fi
 
-        if [ "${{ matrix.build_type }}" == "-full" ]; then
+        if [ "${{ matrix.build_type }}" == "-full" ] || [ "${{ matrix.build_type }}" == "-full-debug" ]; then
           make_flags+=" -DENABLE_RULE_ENGINE=ON "
           make_flags+=" -DENABLE_JWT=ON "
           make_flags+=" -DBUILD_ZMQ_GATEWAY=ON "
           make_flags+=" -DBUILD_BENCH=ON "
+        fi
+
+        if [ "${{ matrix.build_type }}" == "-full-debug" ]; then
+          make_flags+=" -DCONFIG_MXCHIP_DEBUG=1 "
         fi
 
         echo "arch=${arch}" >> $GITHUB_OUTPUT
@@ -184,19 +170,6 @@ jobs:
         sudo checkinstall --backup=no --install=no --type=debian --arch=${{ steps.prepare.outputs.arch }} --pkgname=nanomq --pkgversion=$(git describe --abbrev=0 --tags) --pkggroup=EMQX --maintainer=EMQX --provides=EMQX --pakdir _packages --recommends=1 --suggests=1 -y
         sudo mv _packages/nanomq_$(git describe --abbrev=0 --tags)_${{ steps.prepare.outputs.arch }}.deb _packages/${{ steps.prepare.outputs.pkg_name }}
         cd _packages; echo $(sha256sum ${{ steps.prepare.outputs.pkg_name }} | awk '{print $1}') > ${{ steps.prepare.outputs.pkg_name }}.sha256
-    - name: build rpm
-      if: matrix.package_type == 'rpm'
-      run: |
-        set -eu
-        cd build
-        mkdir -p _packages
-        sudo mkdir -p /root/rpmbuild/SOURCES
-        sudo mkdir -p /root/rpmbuild/BUILD
-        sudo mkdir -p /root/rpmbuild/BUILDROOT
-        pkgversion="$(git describe --abbrev=0 --tags | tr '-' '_')"
-        sudo checkinstall --backup=no --install=no --type=rpm --arch=${{ steps.prepare.outputs.arch }} --pkgname=nanomq --pkgversion=${pkgversion} --pkggroup=EMQX --maintainer=EMQX --provides=EMQX --pakdir _packages --recommends=1 --suggests=1 -y
-        sudo mv _packages/nanomq-${pkgversion}-1.${{ steps.prepare.outputs.arch }}.rpm _packages/${{ steps.prepare.outputs.pkg_name }}
-        cd _packages; echo $(sha256sum ${{ steps.prepare.outputs.pkg_name }} | awk '{print $1}') > ${{ steps.prepare.outputs.pkg_name }}.sha256
 
     - uses: actions/upload-artifact@v3
       with:
@@ -210,98 +183,3 @@ jobs:
         token: ${{ github.token }}
         path: "build/_packages/nanomq*"
         ref: ${{ github.ref }}
-    - name: upload to aws s3
-      if: github.event_name == 'release'
-      run: |
-        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws configure set default.region us-west-2
-        aws s3 cp --recursive build/_packages s3://packages.emqx/nanomq/$(git describe --abbrev=0 --tags)
-
-  build_docker:
-    needs: [build_packages]
-    runs-on: ubuntu-20.04
-
-    strategy:
-      fail-fast: false
-      matrix:
-        suffix:
-        - ""
-        - "-slim"
-        - "-full"
-
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/download-artifact@v3
-      with:
-        name: packages
-    - run: git submodule update --init --recursive
-    - run: docker build -t emqx/nanomq:$(git describe --tags --always)${{ matrix.suffix }} -f deploy/docker/Dockerfile${{ matrix.suffix }} .
-    - run: docker run -d -e DEBUG=1 --name nanomq $(docker images emqx/nanomq -q | head -1) --log_level debug
-    - name: test docker
-      run: |
-        set -e -x -u
-        sudo apt update && sudo apt install -y mosquitto-clients
-        ip_address=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nanomq)
-        sleep 5
-        mosquitto_pub -h $ip_address -t 'topic/A' -m 'test'
-    - if: failure()
-      run: docker ps -a
-    - if: failure()
-      run: docker inspect nanomq
-    - if: failure()
-      run: docker logs nanomq
-    - uses: docker/setup-qemu-action@v2
-    - uses: docker/setup-buildx-action@v2
-    - uses: docker/metadata-action@v4
-      id: meta
-      with:
-        images: emqx/nanomq
-        flavor: |
-          latest=auto
-          suffix=${{ matrix.suffix }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=ref,event=tag
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-    - uses: docker/login-action@v2
-      if: github.event_name == 'release'
-      with:
-        username: ${{ secrets.DOCKER_HUB_USER }}
-        password: ${{ secrets.DOCKER_HUB_TOKEN }}
-    - uses: docker/build-push-action@v3
-      if: github.event_name == 'release'
-      with:
-        platforms: linux/amd64,linux/arm64,linux/arm/v7
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        file: deploy/docker/Dockerfile${{ matrix.suffix }}
-        context: .
-
-  publish_packages:
-    needs: [build_packages, build_docker]
-    runs-on: ubuntu-20.04
-    steps:
-    - name: update nanomq.io
-      if: github.event_name == 'release'
-      run: |
-        set -e -x -u
-        curl -w %{http_code} \
-             --insecure \
-             -H "Content-Type: application/json" \
-             -H "token: ${{ secrets.EMQX_IO_TOKEN }}" \
-             -X POST \
-             -d "{\"repo\":\"nanomq/nanomq\", \"tag\": \"${{ github.ref_name }}\" }" \
-             ${{ secrets.EMQX_IO_RELEASE_API }}
-
-    - uses: Swilder-M/push-packages@master
-      if: github.event_name == 'release'
-      env:
-        GIT_TOKEN: ${{ github.token }}
-        PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      with:
-        product: nanomq
-        version: ${{ github.ref_name }}
