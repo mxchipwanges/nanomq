@@ -1,5 +1,10 @@
 name: coverage
-on: [push]
+on:
+  # push:
+  # pull_request:
+  release:
+    types:
+    - published
 jobs:
 
   linux-coverage:
