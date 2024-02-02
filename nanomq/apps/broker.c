@@ -1196,11 +1196,11 @@ broker(conf *nanomq_conf)
 		}
 	}
 #endif
-#ifdef CONFIG_MXCHIP_DEBUG
-	printf("NanoMQ Broker(v%d.%d.%d-%s mxchip@%s,%s) is started successfully!\n",
+#ifdef CONFIG_MXCHIP
+	log_info("NanoMQ Broker(v%d.%d.%d-%s mxchip@%s,%s) is started successfully!\n",
 		NANO_VER_MAJOR, NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT, __TIME__, __DATE__);
 #else
-	printf("NanoMQ Broker is started successfully!\n");
+	log_info("NanoMQ Broker is started successfully!\n");
 #endif
 
 #if defined(ENABLE_NANOMQ_TESTS)
