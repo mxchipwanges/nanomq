@@ -1730,7 +1730,7 @@ broker_start(int argc, char **argv)
 	}
 #endif
 #if defined(ENABLE_LOG)
-	printf("****conf log level %d ***", nanomq_conf->log.log_level);
+	printf("****conf log level %d ***", nanomq_conf->log.level);
 	if ((rc = log_init(&nanomq_conf->log)) != 0) {
 		NANO_NNG_FATAL("log_init", rc);
 	}
