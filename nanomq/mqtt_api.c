@@ -221,6 +221,7 @@ log_init(conf_log *log)
 {
 	int rv = 0;
 
+	printf("**** log_set_level level %d", log->level);
 	log_set_level(log->level);
 
 	if (0 != (log->type & LOG_TO_CONSOLE)) {
@@ -232,6 +233,7 @@ log_init(conf_log *log)
 		    0 != (rv = nng_mtx_alloc(&log_file_mtx))) {
 			return rv;
 		}
+		printf("**** log_add_fp level %d", log->level);
 		log_add_fp(log->fp, log->level, log_file_mtx, log);
 	}
 
