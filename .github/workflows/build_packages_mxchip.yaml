@@ -33,6 +33,7 @@ jobs:
         # - "-sqlite"
         # - "-msquic"
         - "-full"
+        - "-full-debug"
         exclude:
         - arch: [mips, mips-linux-gnu-gcc, mips-linux-gnu-g++]
           build_type: "-msquic"
@@ -163,6 +164,9 @@ jobs:
         fi
 
         make_flags+=" -DCONFIG_MXCHIP=1 "
+        if [ "${{ matrix.build_type }}" == "-full-debug" ]; then
+          make_flags+=" -DCONFIG_MXCHIP_DEBUG=1 "
+        fi
 
         echo "arch=${arch}" >> $GITHUB_OUTPUT
         echo "pkg_name=${pkg_name}" >> $GITHUB_OUTPUT

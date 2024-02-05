@@ -49,6 +49,10 @@
 #include "include/process.h"
 #include "include/nanomq.h"
 
+#ifdef CONFIG_MXCHIP
+#include "include/version.h"
+#endif
+
 #if defined(SUPP_PLUGIN)
 	#include "include/plugin.h"
 #endif
@@ -1194,7 +1198,13 @@ broker(conf *nanomq_conf)
 		}
 	}
 #endif
+
+#ifdef CONFIG_MXCHIP
+	log_info("NanoMQ Broker (v%d.%d.%d-%s mxchip@@%s,%s) is started successfully!\n", 
+		NANO_VER_MAJOR, NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT, __TIME__, __DATE__);
+#else
 	printf("NanoMQ Broker is started successfully!\n");
+#endif
 
 #if defined(ENABLE_NANOMQ_TESTS)
 	bool is_testing = true;
@@ -1708,6 +1718,16 @@ broker_start(int argc, char **argv)
 			    : nng_strdup(CONF_WSS_URL_DEFAULT);
 		}
 	}
+#ifdef CONFIG_MXCHIP_DEBUG
+		fprintf(stdout,
+		    "Log init first by MXCHIP.\n");
+#if defined(ENABLE_LOG)
+	if ((rc = log_init(&nanomq_conf->log)) != 0) {
+		NANO_NNG_FATAL("log_init", rc);
+	}
+#endif
+#endif
+
 	// Active daemonize
 #ifdef NANO_PLATFORM_WINDOWS
 	if (nanomq_conf->daemon) {
@@ -1719,11 +1739,15 @@ broker_start(int argc, char **argv)
 		log_error("Error occurs, cannot daemonize");
 		rc = -1;
 	}
+	fprintf(stdout,
+		    "process_daemonize return success.\n");
 #endif
+#ifndef CONFIG_MXCHIP_DEBUG
 #if defined(ENABLE_LOG)
 	if ((rc = log_init(&nanomq_conf->log)) != 0) {
 		NANO_NNG_FATAL("log_init", rc);
 	}
+#endif
 #endif
 	print_conf(nanomq_conf);
 
