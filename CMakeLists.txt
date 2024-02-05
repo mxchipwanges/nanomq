@@ -52,6 +52,10 @@ if (NNG_ENABLE_TLS)
   add_definitions(-DNNG_SUPP_TLS)
 endif()
 
+if (CONFIG_MXCHIP) 
+  add_definitions(-DCONFIG_MXCHIP)
+endif()
+
 if (NNG_ENABLE_SQLITE)
   add_definitions(-DNNG_SUPP_SQLITE)
 endif()
