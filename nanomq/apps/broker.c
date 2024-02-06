@@ -1682,11 +1682,14 @@ broker_start(int argc, char **argv)
 	if (!rc) {
 		conf_fini(nanomq_conf);
 		fprintf(stderr, "Cannot parse command line arguments, quit\n");
+		printf("\nconf_parse exit failure!\n");
 		exit(EXIT_FAILURE);
 	} else if (rc == OPT_CONFFILE) {
+		printf("\nconf_parse v1\n");
 		conf_parse(nanomq_conf);
 	} else {
 		// HOCON as default
+		printf("\nconf_parse_ver2\n");
 		conf_parse_ver2(nanomq_conf);
 	}
 
