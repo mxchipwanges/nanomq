@@ -1658,6 +1658,9 @@ broker_start(int argc, char **argv)
 
 	conf *nanomq_conf;
 
+	printf("\n------printf------\n");
+	fprintf(stdout, "broker_start\n");
+
 	if (!status_check(&pid)) {
 		fprintf(stderr,
 		    "One NanoMQ instance is still running, a new instance "
@@ -1686,6 +1689,17 @@ broker_start(int argc, char **argv)
 		// HOCON as default
 		conf_parse_ver2(nanomq_conf);
 	}
+
+#ifdef CONFIG_MXCHIP_DEBUG
+	printf("\nlog inited000.\n");
+#if defined(ENABLE_LOG)
+	if ((rc = log_init(&nanomq_conf->log)) != 0) {
+		NANO_NNG_FATAL("log_init", rc);
+	}
+	printf("\nlog inited111.\n");
+	log_info("\nlog info: inited111.\n");
+#endif
+#endif
 
 	read_env_conf(nanomq_conf);
 
@@ -1718,16 +1732,6 @@ broker_start(int argc, char **argv)
 			    : nng_strdup(CONF_WSS_URL_DEFAULT);
 		}
 	}
-#ifdef CONFIG_MXCHIP_DEBUG
-		fprintf(stdout,
-		    "Log init first by MXCHIP.\n");
-#if defined(ENABLE_LOG)
-	if ((rc = log_init(&nanomq_conf->log)) != 0) {
-		NANO_NNG_FATAL("log_init", rc);
-	}
-#endif
-#endif
-
 	// Active daemonize
 #ifdef NANO_PLATFORM_WINDOWS
 	if (nanomq_conf->daemon) {
@@ -1747,6 +1751,7 @@ broker_start(int argc, char **argv)
 	if ((rc = log_init(&nanomq_conf->log)) != 0) {
 		NANO_NNG_FATAL("log_init", rc);
 	}
+	log_info("log inited xxx.");
 #endif
 #endif
 	print_conf(nanomq_conf);
