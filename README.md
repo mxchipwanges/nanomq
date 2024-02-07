@@ -1,4 +1,4 @@
-mxchip02071015
+mxchip02071036
 # LF Edge NanoMQ
 
 [![GitHub Release](https://img.shields.io/github/release/emqx/nanomq?color=brightgreen&label=Release)](https://github.com/emqx/nanomq/releases)
