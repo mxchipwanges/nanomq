@@ -1617,14 +1617,24 @@ broker_start(int argc, char **argv)
 			    : nng_strdup(CONF_WSS_URL_DEFAULT);
 		}
 	}
-	// Active the configure for nanomq
-	if ((rc = active_conf(nanomq_conf)) != 0) {
-		return rc;
-	}
+#ifdef CONFIG_MXCHIP_DEBUG
+// init log before nanomq process init.
 #if defined(ENABLE_LOG)
 	if ((rc = log_init(&nanomq_conf->log)) != 0) {
 		nng_fatal("log_init", rc);
 	}
+#endif
+#endif
+	// Active the configure for nanomq
+	if ((rc = active_conf(nanomq_conf)) != 0) {
+		return rc;
+	}
+#ifndef CONFIG_MXCHIP_DEBUG
+#if defined(ENABLE_LOG)
+	if ((rc = log_init(&nanomq_conf->log)) != 0) {
+		nng_fatal("log_init", rc);
+	}
+#endif
 #endif
 	print_conf(nanomq_conf);
 
