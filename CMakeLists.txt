@@ -56,6 +56,10 @@ if (CONFIG_MXCHIP)
   add_definitions(-DCONFIG_MXCHIP)
 endif()
 
+if (CONFIG_MXCHIP_DEBUG)
+  add_definitions(-DCONFIG_MXCHIP_DEBUG)
+endif()
+
 if (NNG_ENABLE_SQLITE)
   add_definitions(-DNNG_SUPP_SQLITE)
 endif()

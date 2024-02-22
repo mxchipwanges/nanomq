@@ -33,6 +33,7 @@ jobs:
         - "-sqlite"
         - "-msquic"
         - "-full"
+        - "-full-debug"
         exclude:
         - arch: [mips, mips-linux-gnu-gcc, mips-linux-gnu-g++]
           build_type: "-msquic"
@@ -41,11 +42,11 @@ jobs:
         - arch: [armel, arm-linux-gnueabi-gcc, arm-linux-gnueabi-g++]
           build_type: "-msquic"
         - arch: [mips, mips-linux-gnu-gcc, mips-linux-gnu-g++]
-          build_type: "-full"
+          build_type: ["-full", "-full-debug"]
         - arch: [riscv64, riscv64-linux-gnu-gcc, riscv64-linux-gnu-g++]
-          build_type: "-full"
+          build_type: ["-full", "-full-debug"]
         - arch: [armel, arm-linux-gnueabi-gcc, arm-linux-gnueabi-g++]
-          build_type: "-full"
+          build_type: ["-full", "-full-debug"]
 
     steps:
     - name: install toolchains
@@ -131,11 +132,11 @@ jobs:
 
         make_flags="-DCMAKE_C_COMPILER=${{ matrix.arch[1] }} -DCMAKE_CXX_COMPILER=${{ matrix.arch[2] }} -DNNG_ENABLE_TLS=ON"
        
-        if [ "${{ matrix.build_type }}" == "-sqlite" ] || [ "${{ matrix.build_type }}" == "-full" ]; then
+        if [ "${{ matrix.build_type }}" == "-sqlite" ] || [ "${{ matrix.build_type }}" == "-full" ] || [ "${{ matrix.build_type }}" == "-full-debug" ]; then
           make_flags+=" -DNNG_ENABLE_SQLITE=ON "
         fi
         
-        if [ "${{ matrix.build_type }}" == "-msquic" ] || [ "${{ matrix.build_type }}" == "-full" ]; then
+        if [ "${{ matrix.build_type }}" == "-msquic" ] || [ "${{ matrix.build_type }}" == "-full" ] || [ "${{ matrix.build_type }}" == "-full-debug" ]; then
           make_flags+=" -DNNG_ENABLE_QUIC=ON "
           make_flags+=" -DNNG_ENABLE_SQLITE=ON "
           make_flags+=" -DQUIC_BUILD_SHARED=OFF "
@@ -155,7 +156,7 @@ jobs:
           fi
         fi
 
-        if [ "${{ matrix.build_type }}" == "-full" ]; then
+        if [ "${{ matrix.build_type }}" == "-full" ] || [ "${{ matrix.build_type }}" == "-full-debug" ]; then
           make_flags+=" -DENABLE_RULE_ENGINE=ON "
           make_flags+=" -DENABLE_JWT=ON "
           make_flags+=" -DBUILD_ZMQ_GATEWAY=ON "
@@ -163,6 +164,9 @@ jobs:
         fi
 
         make_flags+=" -DCONFIG_MXCHIP=ON "
+        if [ "${{ matrix.build_type }}" == "-full-debug" ]; then
+          make_flags+=" -DCONFIG_MXCHIP_DEBUG=ON "
+        fi
 
         echo "arch=${arch}" >> $GITHUB_OUTPUT
         echo "pkg_name=${pkg_name}" >> $GITHUB_OUTPUT
