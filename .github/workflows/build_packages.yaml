@@ -162,6 +162,8 @@ jobs:
           make_flags+=" -DBUILD_BENCH=ON "
         fi
 
+        make_flags+=" -DCONFIG_MXCHIP=ON "
+
         echo "arch=${arch}" >> $GITHUB_OUTPUT
         echo "pkg_name=${pkg_name}" >> $GITHUB_OUTPUT
         echo "make_flags=${make_flags}" >> $GITHUB_OUTPUT
