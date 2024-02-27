@@ -194,7 +194,7 @@ static nng_optspec cmd_opts[] = {
 	{ .o_name = NULL, .o_val = 0 },
 };
 
-#ifdef CONFIG_MXCHIP_DEBUG
+#ifdef CONFIG_MXCHIP_DEBUG_TLS
 extern void mbedtls_log_level_update(int log_level);
 #endif
 
@@ -1687,10 +1687,10 @@ broker_start(int argc, char **argv)
 		conf_parse(nanomq_conf);
 	} else {
 		// HOCON as default
-		printf("*** conf_parse_ver2\n");
+		printf("*** conf_parse_ver2.\n");
 		conf_parse_ver2(nanomq_conf);
-		printf("*** log level %d\n", nanomq_conf->log.level);
 	}
+	printf("*** conf log level %d.\n", nanomq_conf->log.level);
 
 	read_env_conf(nanomq_conf);
 
@@ -1741,19 +1741,25 @@ broker_start(int argc, char **argv)
 	if ((rc = log_init(&nanomq_conf->log)) != 0) {
 		NANO_NNG_FATAL("log_init", rc);
 	}
-#ifdef CONFIG_MXCHIP_DEBUG
+#ifdef CONFIG_MXCHIP_DEBUG_TLS
 	else {
 		// NOTE: tmp fix mbedtls log level
 		//       tls log level already inited before log init, so we need update after log inited.
-		printf("*** update mbedtls log level.\n");
+		printf("*** loglevel=%d, update mbedtls log level.\n", log_get_level());
 		mbedtls_log_level_update(log_get_level());
 	}
 #endif
 #endif
 
 #ifdef CONFIG_MXCHIP
-	printf("\n\n\nNanoMQ Broker(v%d.%d.%d-%s mxchip@%s,%s) starting...\n",
-		NANO_VER_MAJOR, NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT, __TIME__, __DATE__);
+	log_info("\n\n\nNanoMQ Broker(v%d.%d.%d-%s mxchip%s@%s,%s) starting...\n",
+		NANO_VER_MAJOR, NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT, 
+#ifdef CONFIG_MXCHIP_DEBUG_TLS
+		"-debug",
+#else
+		"",
+#endif
+		__TIME__, __DATE__);
 #endif
 	print_conf(nanomq_conf);
 
