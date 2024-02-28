@@ -70,7 +70,11 @@ jobs:
         set -eu
         git clone https://github.com/Mbed-TLS/mbedtls.git && cd mbedtls &&  git checkout tags/v3.3.0
         mkdir build && cd build
-        cmake -DCMAKE_C_COMPILER=${{ matrix.arch[1] }} -DCMAKE_CXX_COMPILER=${{ matrix.arch[2] }} -DENABLE_TESTING=OFF ..
+        if [ "${{ matrix.build_type }}" == "-full-debug" ]; then
+          cmake -DCMAKE_C_COMPILER=${{ matrix.arch[1] }} -DCMAKE_CXX_COMPILER=${{ matrix.arch[2] }} -DENABLE_TESTING=OFF -DCMAKE_BUILD_TYPE=Debug ..
+        else
+          cmake -DCMAKE_C_COMPILER=${{ matrix.arch[1] }} -DCMAKE_CXX_COMPILER=${{ matrix.arch[2] }} -DENABLE_TESTING=OFF ..
+        fi
         cmake --build .
         sudo make install
         cd ../ && rm -rf ./build
@@ -165,6 +169,7 @@ jobs:
 
         make_flags+=" -DCONFIG_MXCHIP=ON "
         if [ "${{ matrix.build_type }}" == "-full-debug" ]; then
+          make_flags+=" -DDEBUG=ON "
           make_flags+=" -DCONFIG_MXCHIP_DEBUG_TLS=ON "
         fi
 
