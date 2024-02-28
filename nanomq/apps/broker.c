@@ -1689,8 +1689,8 @@ broker_start(int argc, char **argv)
 		// HOCON as default
 		printf("*** conf_parse_ver2.\n");
 		conf_parse_ver2(nanomq_conf);
-		printf("*** conf log level %d.\n", nanomq_conf->log.level);
 	}
+	printf("*** conf log level %d.\n", nanomq_conf->log.level);
 
 	read_env_conf(nanomq_conf);
 
@@ -1752,10 +1752,10 @@ broker_start(int argc, char **argv)
 #endif
 
 #ifdef CONFIG_MXCHIP
-	printf("\n\n\nNanoMQ Broker(v%d.%d.%d-%s mxchip%s@%s,%s) starting...\n",
+	log_info("\n\n\nNanoMQ Broker(v%d.%d.%d-%s mxchip%s@%s,%s) starting...\n",
 		NANO_VER_MAJOR, NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT, 
 #ifdef CONFIG_MXCHIP_DEBUG_TLS
-		"-debug"
+		"-debug",
 #else
 		"",
 #endif
