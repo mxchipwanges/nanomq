@@ -171,6 +171,7 @@ jobs:
         if [ "${{ matrix.build_type }}" == "-full-debug" ]; then
           make_flags+=" -DDEBUG=ON "
           make_flags+=" -DCONFIG_MXCHIP_DEBUG_TLS=ON "
+          make_flags+=" -DCONFIG_MXCHIP_FORCE_DEBUG_LOG=ON "
         fi
 
         echo "arch=${arch}" >> $GITHUB_OUTPUT

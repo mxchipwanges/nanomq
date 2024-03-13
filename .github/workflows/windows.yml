@@ -15,7 +15,7 @@ jobs:
       - run: git submodule update --init --recursive
 
       - name: Configure
-        run: cmake -B build -DCONFIG_MXCHIP=ON -DCONFIG_MXCHIP_DEBUG_TLS=ON -DDEBUG=ON
+        run: cmake -B build -DDEBUG=ON -DCONFIG_MXCHIP=ON -DCONFIG_MXCHIP_DEBUG_TLS=ON -DCONFIG_MXCHIP_FORCE_DEBUG_LOG=ON 
 
       - name: Build
         run: cmake --build build --config Release --target install 

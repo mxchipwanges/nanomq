@@ -60,6 +60,10 @@ if (CONFIG_MXCHIP_DEBUG_TLS)
   add_definitions(-DCONFIG_MXCHIP_DEBUG_TLS)
 endif()
 
+if (CONFIG_MXCHIP_FORCE_DEBUG_LOG)
+  add_definitions(-DCONFIG_MXCHIP_FORCE_DEBUG_LOG)
+endif()
+
 if (NNG_ENABLE_SQLITE)
   add_definitions(-DNNG_SUPP_SQLITE)
 endif()
