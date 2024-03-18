@@ -1752,7 +1752,7 @@ broker_start(int argc, char **argv)
 #endif
 
 #ifdef CONFIG_MXCHIP
-	log_info("\n\n\nNanoMQ Broker(v%d.%d.%d-%s mxchip%s@%s,%s) starting...\n",
+	log_info("\nNanoMQ Broker(v%d.%d.%d-%s mxchip%s@%s,%s) starting...\n",
 		NANO_VER_MAJOR, NANO_VER_MINOR, NANO_VER_PATCH, NANO_VER_ID_SHORT, 
 #ifdef CONFIG_MXCHIP_DEBUG_TLS
 		"-debug",
